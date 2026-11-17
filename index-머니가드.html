@@ -1,0 +1,728 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>머니가드 | 우리 가족 공동 통장</title>
+<style>
+:root {
+  --green:#16a37b;
+  --dark:#153a34;
+  --light:#e8f8f1;
+  --bg:#f5f8f7;
+  --gray:#71817d;
+  --red:#e65353;
+  --border:#e5eeea;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  background:var(--bg);
+  font-family:"Pretendard","Malgun Gothic",sans-serif;
+  color:#213b35;
+}
+button,input,select {font:inherit}
+button {cursor:pointer}
+button:disabled {opacity:.5;cursor:not-allowed}
+header {
+  background:white;
+  border-bottom:1px solid var(--border);
+  padding:17px 5%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  position:sticky;
+  top:0;
+  z-index:5;
+}
+.logo {font-size:23px;font-weight:900;color:var(--green)}
+.logo span {font-size:12px;color:var(--gray);display:block;font-weight:400}
+button {
+  border:0;
+  border-radius:12px;
+  padding:11px 17px;
+  font-weight:700;
+}
+.primary {background:var(--green);color:white}
+.secondary {background:var(--light);color:var(--green)}
+.danger {background:#fff0f0;color:var(--red)}
+.small {font-size:12px;padding:9px 13px}
+main {max-width:1150px;margin:28px auto;padding:0 18px}
+.hero {
+  background:linear-gradient(125deg,#117c66,#1ab88a);
+  color:white;
+  border-radius:23px;
+  padding:30px;
+  margin-bottom:20px;
+}
+.hero h1 {font-size:26px;margin:0 0 8px}
+.hero p {opacity:.88;margin:0}
+.summary {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+  margin:20px 0;
+}
+.card {
+  background:white;
+  border:1px solid var(--border);
+  border-radius:19px;
+  padding:22px;
+  box-shadow:0 4px 18px #183c3007;
+}
+.card h2 {font-size:17px;margin:0 0 17px}
+.stat-label {font-size:13px;color:var(--gray)}
+.stat {font-size:26px;font-weight:900;margin-top:10px}
+.green {color:var(--green)}
+.red {color:var(--red)}
+.layout {
+  display:grid;
+  grid-template-columns:1.25fr 1fr;
+  gap:18px;
+}
+.chat {
+  height:390px;
+  overflow-y:auto;
+  background:#f8fbf9;
+  padding:15px;
+  border-radius:14px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.message {
+  max-width:90%;
+  background:white;
+  padding:13px;
+  border-radius:13px;
+  border:1px solid var(--border);
+  font-size:13px;
+  line-height:1.65;
+  overflow-wrap:anywhere;
+}
+.message.warning {background:#fff1f1;border-color:#ffd1d1}
+.message.deposit {background:#e7f9f0;border-color:#bcebd4}
+.message strong {display:block;font-size:14px}
+.time {font-size:11px;color:#91a09b;margin-top:5px}
+.members {display:flex;flex-direction:column;gap:12px}
+.member {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#f8fbf9;
+  border-radius:12px;
+  padding:14px;
+  gap:8px;
+}
+.member small {color:var(--gray)}
+.member b {white-space:nowrap}
+.progress {
+  height:10px;
+  background:#e8eeeb;
+  border-radius:20px;
+  overflow:hidden;
+  margin-top:14px;
+}
+.progress div {
+  height:100%;
+  background:var(--green);
+  width:0;
+  transition:width .3s;
+}
+.flex {display:flex;justify-content:space-between;gap:10px}
+.form-group {margin-bottom:13px}
+label {display:block;font-size:13px;font-weight:700;margin-bottom:7px}
+input,select {
+  width:100%;
+  border:1px solid #dce8e2;
+  background:white;
+  padding:12px;
+  border-radius:10px;
+  outline:none;
+}
+input:focus,select:focus {border-color:var(--green)}
+.full {width:100%}
+.tip {
+  background:#f0faf5;
+  padding:14px;
+  border-radius:12px;
+  margin:9px 0;
+  font-size:13px;
+  line-height:1.7;
+}
+.notice {
+  font-size:12px;
+  color:var(--gray);
+  line-height:1.7;
+}
+.grid2 {display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.toast {
+  position:fixed;
+  bottom:22px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#213b35;
+  color:white;
+  padding:13px 22px;
+  border-radius:12px;
+  display:none;
+  z-index:20;
+  max-width:90%;
+  text-align:center;
+}
+@media(max-width:750px) {
+  .summary {grid-template-columns:1fr}
+  .layout,.grid2 {grid-template-columns:1fr}
+  .hero h1 {font-size:22px}
+  .stat {font-size:23px}
+  .card {padding:18px}
+  header {padding:13px 4%}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    🛡️ 머니가드
+    <span>우리 가족의 똑똑한 금융 지킴이</span>
+  </div>
+  <button class="primary small" onclick="randomPayment()">
+    💳 카드 쓰기
+  </button>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>우리 가족의 돈, 함께 지켜요 👨‍👩‍👧‍👦</h1>
+    <p>공동 통장 관리부터 과소비 감지까지, 머니가드!</p>
+  </section>
+
+  <section class="summary">
+    <div class="card">
+      <div class="stat-label">💰 공동 계좌 잔액</div>
+      <div class="stat green" id="balance">0원</div>
+      <p class="notice">가족 모두가 함께 사용하는 통장</p>
+    </div>
+    <div class="card">
+      <div class="stat-label">💳 이번 달 총 소비</div>
+      <div class="stat" id="spent">0원</div>
+      <p class="notice">이번 달 결제 및 이체 합계</p>
+    </div>
+    <div class="card">
+      <div class="stat-label">🌱 예상 절약 가능 금액</div>
+      <div class="stat green" id="saving">0원</div>
+      <p class="notice">소비 유형별 절약 추정치</p>
+    </div>
+  </section>
+
+  <div class="layout">
+    <section class="card">
+      <div class="flex">
+        <h2>💬 우리 가족 통장 알림</h2>
+        <span class="notice">● 시뮬레이션</span>
+      </div>
+      <div class="chat" id="chat" aria-live="polite"></div>
+      <p class="notice">
+        우측 상단의 카드 쓰기를 누르면 랜덤 결제가 발생합니다.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>👨‍👩‍👧‍👦 가족별 소비 현황</h2>
+      <div class="members" id="members"></div>
+      <div style="margin-top:22px">
+        <div class="flex">
+          <strong>이번 달 소비 한도</strong>
+          <strong id="limitText"></strong>
+        </div>
+        <div class="progress"><div id="progressBar"></div></div>
+        <p class="notice" id="progressText"></p>
+      </div>
+      <hr style="border:0;border-top:1px solid #eee;margin:22px 0">
+      <h2>⚙️ 소비 한도 설정</h2>
+      <div class="form-group">
+        <label for="limitInput">월 소비 한도 (원)</label>
+        <input id="limitInput" type="number" min="1" step="1">
+      </div>
+      <button class="secondary full" onclick="changeLimit()">
+        한도 변경하기
+      </button>
+    </section>
+  </div>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>💸 직접 거래하기</h2>
+      <div class="form-group">
+        <label for="person">사용자</label>
+        <select id="person">
+          <option>아빠</option>
+          <option>엄마</option>
+          <option>나</option>
+          <option>동생</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="amount">금액 (원)</label>
+        <input id="amount" type="number" min="1"
+               step="1" placeholder="예: 15000">
+      </div>
+      <div class="form-group">
+        <label for="category">소비 항목</label>
+        <select id="category">
+          <option value="식비">🍚 식비</option>
+          <option value="쇼핑">🛍️ 쇼핑</option>
+          <option value="교통">🚌 교통</option>
+          <option value="생활">🏠 생활</option>
+          <option value="여가">🎮 여가</option>
+          <option value="이체">💸 계좌이체</option>
+        </select>
+      </div>
+      <div class="flex">
+        <button class="primary full" onclick="manualPayment()">
+          결제 / 이체
+        </button>
+        <button class="secondary full" onclick="deposit()">
+          입금하기
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>🤖 머니가드 소비 분석</h2>
+      <p class="notice">
+        소비 내역을 자동 분류하고 절약 방법을 추천합니다.
+      </p>
+      <div id="analysis"></div>
+      <h2 style="margin-top:22px">💡 맞춤 절약 추천</h2>
+      <div id="tips"></div>
+    </section>
+  </div>
+
+  <div style="text-align:center;margin:24px 0">
+    <button class="danger small" onclick="resetData()">
+      🗑️ 테스트 데이터 초기화
+    </button>
+    <p class="notice">
+      
+    </p>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const KEY = "moneyguard_demo_v1";
+const people = ["아빠","엄마","나","동생"];
+
+const randomItems = [
+  {name:"편의점",category:"식비"},
+  {name:"카페",category:"식비"},
+  {name:"음식점",category:"식비"},
+  {name:"온라인 쇼핑",category:"쇼핑"},
+  {name:"옷 가게",category:"쇼핑"},
+  {name:"대중교통",category:"교통"},
+  {name:"택시",category:"교통"},
+  {name:"마트",category:"생활"},
+  {name:"영화관",category:"여가"},
+  {name:"게임",category:"여가"}
+];
+
+const savingRates = {
+  "식비":0.10,
+  "쇼핑":0.20,
+  "교통":0.05,
+  "생활":0.05,
+  "여가":0.15,
+  "이체":0
+};
+
+function initialState() {
+  return {
+    balance:2000000,
+    limit:500000,
+    transactions:[],
+    messages:[{
+      title:"🛡️ 머니가드",
+      body:"우리 가족 공동 통장이 시작되었어요! 카드 쓰기 버튼으로 결제를 테스트해 보세요.",
+      type:"normal",
+      date:new Date().toISOString()
+    }]
+  };
+}
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY));
+    if (
+      saved &&
+      Number.isFinite(saved.balance) &&
+      Number.isFinite(saved.limit) &&
+      saved.limit > 0 &&
+      Array.isArray(saved.transactions) &&
+      Array.isArray(saved.messages)
+    ) return saved;
+  } catch(e) {}
+  return initialState();
+}
+
+let state = loadState();
+
+function save() {
+  try {
+    localStorage.setItem(KEY,JSON.stringify(state));
+  } catch(e) {
+    toast("저장 공간이 부족하여 기록이 유지되지 않을 수 있어요.");
+  }
+}
+
+function money(n) {
+  return Math.round(n).toLocaleString("ko-KR")+"원";
+}
+
+function monthKey(date) {
+  const d = new Date(date);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+}
+
+function thisMonth() {
+  return monthKey(new Date());
+}
+
+function monthlyTransactions() {
+  return state.transactions.filter(
+    t=>monthKey(t.date)===thisMonth()
+  );
+}
+
+function monthlySpent() {
+  return monthlyTransactions()
+    .filter(t=>t.type==="payment")
+    .reduce((sum,t)=>sum+t.amount,0);
+}
+
+function previousSpent() {
+  return state.transactions
+    .filter(t=>t.type==="payment" &&
+      monthKey(t.date)===thisMonth())
+    .reduce((sum,t)=>sum+t.amount,0);
+}
+
+function toast(message) {
+  const el=document.getElementById("toast");
+  el.textContent=message;
+  el.style.display="block";
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>{
+    el.style.display="none";
+  },3000);
+}
+
+function addMessage(title,body,type="normal") {
+  state.messages.push({
+    title,body,type,date:new Date().toISOString()
+  });
+  if(state.messages.length>150) {
+    state.messages=state.messages.slice(-150);
+  }
+}
+
+function validateAmount() {
+  const raw=document.getElementById("amount").value.trim();
+  const n=Number(raw);
+  if(!raw || !Number.isSafeInteger(n) || n<=0) {
+    toast("1원 이상의 올바른 정수 금액을 입력해 주세요.");
+    return null;
+  }
+  return n;
+}
+
+function classify(name) {
+  const item=randomItems.find(i=>i.name===name);
+  return item ? item.category : "생활";
+}
+
+function payment(person,amount,category,store) {
+  if(!people.includes(person) ||
+     !Number.isSafeInteger(amount) || amount<=0) {
+    toast("거래 정보를 확인해 주세요.");
+    return;
+  }
+  if(amount>state.balance) {
+    toast("잔액이 부족해 결제할 수 없어요.");
+    addMessage(
+      "❌ 결제 실패",
+      person+"님의 "+money(amount)+" 결제가 잔액 부족으로 거절되었습니다.",
+      "warning"
+    );
+    save();
+    render();
+    return;
+  }
+
+  const before=monthlySpent();
+  state.balance-=amount;
+
+  state.transactions.push({
+    person,amount,category,
+    store:store||category,
+    type:"payment",
+    date:new Date().toISOString()
+  });
+
+  addMessage(
+    "💳 "+person+"님 결제 알림",
+    (store||category)+"에서 "+money(amount)+" 사용\n"+
+    "분류: "+category+" | 남은 잔액: "+money(state.balance)
+  );
+
+  const after=monthlySpent();
+
+  if(after>state.limit && before<=state.limit) {
+    addMessage(
+      "🚨 과소비 주의!",
+      "가족의 이번 달 소비가 한도를 초과했어요!\n"+
+      "한도: "+money(state.limit)+"\n"+
+      "초과 금액: "+money(after-state.limit),
+      "warning"
+    );
+    toast("🚨 소비 한도를 초과했습니다!");
+  } else if(after>state.limit) {
+    addMessage(
+      "⚠️ 소비 한도 초과 상태",
+      "현재 한도보다 "+money(after-state.limit)+
+      " 더 사용했어요. 추가 지출에 주의하세요.",
+      "warning"
+    );
+  } else if(before<state.limit*.8 && after>=state.limit*.8) {
+    addMessage(
+      "⚠️ 소비 한도 80% 도달",
+      "이번 달 한도의 80% 이상 사용했어요.",
+      "warning"
+    );
+  }
+
+  save();
+  render();
+}
+
+function randomPayment() {
+  if(state.balance<=0) {
+    toast("잔액이 없어 결제할 수 없어요.");
+    return;
+  }
+  const person=people[Math.floor(Math.random()*people.length)];
+  const item=randomItems[Math.floor(Math.random()*randomItems.length)];
+  const amount=(Math.floor(Math.random()*90)+1)*1000;
+
+  payment(person,amount,classify(item.name),item.name);
+}
+
+function manualPayment() {
+  const amount=validateAmount();
+  if(amount===null)return;
+
+  const person=document.getElementById("person").value;
+  const category=document.getElementById("category").value;
+  payment(person,amount,category,category);
+  document.getElementById("amount").value="";
+}
+
+function deposit() {
+  const amount=validateAmount();
+  if(amount===null)return;
+
+  if(!Number.isSafeInteger(state.balance+amount)) {
+    toast("입금 가능한 금액 범위를 초과했어요.");
+    return;
+  }
+
+  const person=document.getElementById("person").value;
+  state.balance+=amount;
+
+  state.transactions.push({
+    person,amount,category:"입금",
+    store:"공동 통장 입금",
+    type:"deposit",
+    date:new Date().toISOString()
+  });
+
+  addMessage(
+    "💰 "+person+"님 입금",
+    money(amount)+"을 공동 통장에 입금했어요.\n"+
+    "현재 잔액: "+money(state.balance),
+    "deposit"
+  );
+
+  document.getElementById("amount").value="";
+  save();
+  render();
+  toast("입금 완료!");
+}
+
+function changeLimit() {
+  const raw=document.getElementById("limitInput").value.trim();
+  const n=Number(raw);
+
+  if(!raw || !Number.isSafeInteger(n) || n<=0) {
+    toast("소비 한도는 1원 이상의 정수로 설정해 주세요.");
+    return;
+  }
+
+  state.limit=n;
+  addMessage(
+    "⚙️ 소비 한도 변경",
+    "가족의 월 소비 한도가 "+money(n)+"으로 변경되었어요."
+  );
+
+  if(monthlySpent()>n) {
+    addMessage(
+      "🚨 소비 한도 초과",
+      "변경된 한도보다 "+money(monthlySpent()-n)+
+      " 더 사용한 상태입니다.",
+      "warning"
+    );
+  }
+
+  save();
+  render();
+  toast("소비 한도가 변경되었습니다.");
+}
+
+function resetData() {
+  if(!confirm("모든 테스트 거래 내역을 초기화할까요?"))return;
+  state=initialState();
+  save();
+  render();
+  toast("초기화 완료!");
+}
+
+function create(tag,className,text) {
+  const el=document.createElement(tag);
+  if(className)el.className=className;
+  if(text!==undefined)el.textContent=text;
+  return el;
+}
+
+function renderChat() {
+  const chat=document.getElementById("chat");
+  chat.replaceChildren();
+
+  state.messages.slice(-60).forEach(m=>{
+    const box=create("div","message "+(m.type||"normal"));
+    box.appendChild(create("strong","",m.title));
+    const body=create("div","",m.body);
+    body.style.whiteSpace="pre-line";
+    box.appendChild(body);
+    box.appendChild(create(
+      "div","time",
+      new Date(m.date).toLocaleString("ko-KR")
+    ));
+    chat.appendChild(box);
+  });
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function renderMembers() {
+  const root=document.getElementById("members");
+  root.replaceChildren();
+
+  people.forEach(person=>{
+    const spent=monthlyTransactions()
+      .filter(t=>t.type==="payment" && t.person===person)
+      .reduce((s,t)=>s+t.amount,0);
+
+    const row=create("div","member");
+    const left=create("div");
+    left.appendChild(create("strong","",
+      "👤 "+person));
+    left.appendChild(create("div","notice","이번 달 사용 금액"));
+    row.appendChild(left);
+    row.appendChild(create("b","",money(spent)));
+    root.appendChild(row);
+  });
+}
+
+function renderAnalysis() {
+  const totals={};
+  let savings=0;
+
+  monthlyTransactions()
+    .filter(t=>t.type==="payment")
+    .forEach(t=>{
+      totals[t.category]=(totals[t.category]||0)+t.amount;
+      savings+=t.amount*(savingRates[t.category]||0);
+    });
+
+  document.getElementById("saving").textContent=money(savings);
+
+  const analysis=document.getElementById("analysis");
+  const tips=document.getElementById("tips");
+  analysis.replaceChildren();
+  tips.replaceChildren();
+
+  const entries=Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+
+  if(!entries.length) {
+    analysis.appendChild(create("p","notice","아직 이번 달 소비 내역이 없어요."));
+    tips.appendChild(create("div","tip",
+      "첫 결제를 테스트하면 절약 방법을 알려드릴게요!"));
+    return;
+  }
+
+  entries.forEach(([category,amount])=>{
+    const row=create("div","flex");
+    row.style.margin="12px 0";
+    row.appendChild(create("span","",category));
+    row.appendChild(create("strong","",money(amount)));
+    analysis.appendChild(row);
+  });
+
+  const recommendations={
+    "식비":"배달이나 카페 이용을 줄이고 집에서 식사해 보세요.",
+    "쇼핑":"구매 전 24시간 기다리는 습관을 만들어 보세요.",
+    "교통":"택시 대신 대중교통을 활용해 보세요.",
+    "생활":"장보기 목록을 작성해 불필요한 구매를 줄이세요.",
+    "여가":"무료 문화생활과 할인 혜택을 찾아보세요.",
+    "이체":"정기 이체와 필수 지출을 구분해 관리하세요."
+  };
+
+  entries.slice(0,3).forEach(([category])=>{
+    tips.appendChild(create(
+      "div","tip",
+      "💡 "+category+": "+recommendations[category]
+    ));
+  });
+}
+
+function render() {
+  const spent=monthlySpent();
+  const percent=spent/state.limit*100;
+
+  document.getElementById("balance").textContent=money(state.balance);
+  document.getElementById("spent").textContent=money(spent);
+  document.getElementById("limitText").textContent=money(state.limit);
+  document.getElementById("limitInput").value=state.limit;
+
+  const bar=document.getElementById("progressBar");
+  bar.style.width=Math.min(100,percent)+"%";
+  bar.style.background=percent>100?"#e65353":
+    percent>=80?"#f0a638":"#16a37b";
+
+  document.getElementById("progressText").textContent=
+    percent>100
+      ? "🚨 한도 초과! "+money(spent-state.limit)+" 초과 사용"
+      : "소비 한도의 "+percent.toFixed(1)+"% 사용";
+
+  renderChat();
+  renderMembers();
+  renderAnalysis();
+}
+
+render();
+</script>
+</body>
+</html>
